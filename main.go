@@ -1,25 +1,50 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 
 	"github.com/roshankaranth/gator/internal/config"
 )
 
+type state struct {
+	cfg *config.Config
+}
+
 func main() {
-	data, err := config.Read()
-	if err != nil {
-		fmt.Printf("%v", err)
-	}
 
-	data.SetUser("roshan")
-
-	data, err = config.Read()
+	cfg, err := config.Read()
 
 	if err != nil {
-		fmt.Printf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
-	fmt.Printf("DB_URL : %s\nCurrent username : %s\n", data.Db_url, data.Current_user_name)
+	programState := &state{
+		cfg: &cfg,
+	}
+
+	cmds := commands{
+		registeredCommands: make(map[string]func(*state, command) error),
+	}
+
+	err = cmds.register("login", handlerLogin)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(os.Args) < 2 {
+		log.Fatalf("Not enough args provided!\n")
+	}
+
+	cmd := command{
+		name: os.Args[1],
+		args: os.Args[2:],
+	}
+
+	err = cmds.run(programState, cmd)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
