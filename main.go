@@ -53,6 +53,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = cmds.register("reset", handlerReset)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = cmds.register("users", handlerUsers)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if len(os.Args) < 2 {
 		log.Fatalf("Not enough args provided!\n")
 	}
