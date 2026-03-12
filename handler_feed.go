@@ -40,3 +40,28 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Printf("Feed created succesfully!\n\nID : %v\nCreated At : %v\nUpdated At : %v\nName of feed : %v\nURL : %v\nUserID : %v\n", feed.ID, feed.CreatedAt, feed.UpdatedAt, feed.Name, feed.Url, feed.UserID)
 	return nil
 }
+
+func handlerFeeds(s *state, cmd command) error {
+
+	feeds, err := s.db.GetFeeds(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Feeds : \n\n")
+	for i, feed := range feeds {
+		user, err := s.db.GetUserFromID(context.Background(), feed.UserID)
+
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%v)", i+1)
+		fmt.Printf(" Name : %s\n", feed.Name)
+		fmt.Printf("   URL : %s\n", feed.Url)
+		fmt.Printf("   User : %s\n\n", user.Name)
+
+	}
+
+	return nil
+}
