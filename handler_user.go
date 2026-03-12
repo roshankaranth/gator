@@ -79,3 +79,16 @@ func handlerUsers(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerAggregate(s *state, cmd command) error {
+	url := "https://www.wagslane.dev/index.xml"
+
+	rssFeed, err := fetchFeed(context.Background(), url)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%v", *rssFeed)
+	return nil
+}
