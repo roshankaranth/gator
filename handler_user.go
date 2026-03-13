@@ -92,3 +92,60 @@ func handlerAggregate(s *state, cmd command) error {
 	fmt.Printf("%v", *rssFeed)
 	return nil
 }
+
+func handlerFollow(s *state, cmd command) error {
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("Insufficient args!\n")
+	}
+
+	current_user := s.cfg.Current_user_name
+	url := cmd.args[0]
+	user, err := s.db.GetUser(context.Background(), current_user)
+
+	if err != nil {
+		return err
+	}
+
+	userID := user.ID
+
+	feed, err := s.db.GetFeedFromURL(context.Background(), url)
+
+	if err != nil {
+		return err
+	}
+
+	feedFollowItem := database.CreatedFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		FeedID:    feed.ID,
+		UserID:    userID,
+	}
+
+	_, err = s.db.CreatedFeedFollow(context.Background(), feedFollowItem)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Name of Feed : %s\nUser : %s\n", feed.Name, current_user)
+	return nil
+
+}
+
+func handlerFollowing(s *state, cmd command) error {
+	current_user := s.cfg.Current_user_name
+
+	feed_follow, err := s.db.GetFeedFollowsForUser(context.Background(), current_user)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Feeds followed by %s:\n", current_user)
+	for _, row := range feed_follow {
+		fmt.Printf("- %s\n", row.FeedName)
+	}
+
+	return nil
+}

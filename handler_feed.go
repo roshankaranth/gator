@@ -37,6 +37,20 @@ func handlerAddFeed(s *state, cmd command) error {
 		return err
 	}
 
+	feedFollowItem := database.CreatedFeedFollowParams{
+		ID:        user_feed.ID,
+		CreatedAt: user_feed.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		FeedID:    feed.ID,
+		UserID:    userID,
+	}
+
+	_, err = s.db.CreatedFeedFollow(context.Background(), feedFollowItem)
+
+	if err != nil {
+		return err
+	}
+
 	fmt.Printf("Feed created succesfully!\n\nID : %v\nCreated At : %v\nUpdated At : %v\nName of feed : %v\nURL : %v\nUserID : %v\n", feed.ID, feed.CreatedAt, feed.UpdatedAt, feed.Name, feed.Url, feed.UserID)
 	return nil
 }
