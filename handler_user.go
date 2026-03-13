@@ -93,18 +93,13 @@ func handlerAggregate(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("Insufficient args!\n")
 	}
 
 	current_user := s.cfg.Current_user_name
 	url := cmd.args[0]
-	user, err := s.db.GetUser(context.Background(), current_user)
-
-	if err != nil {
-		return err
-	}
 
 	userID := user.ID
 
@@ -133,7 +128,7 @@ func handlerFollow(s *state, cmd command) error {
 
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	current_user := s.cfg.Current_user_name
 
 	feed_follow, err := s.db.GetFeedFollowsForUser(context.Background(), current_user)

@@ -9,17 +9,10 @@ import (
 	"github.com/roshankaranth/gator/internal/database"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 	if len(cmd.args) < 2 {
 		return fmt.Errorf("insufficient arguments!\n")
-	}
-
-	current_user := s.cfg.Current_user_name
-	user, err := s.db.GetUser(context.Background(), current_user)
-
-	if err != nil {
-		return err
 	}
 
 	userID := user.ID
@@ -77,5 +70,34 @@ func handlerFeeds(s *state, cmd command) error {
 
 	}
 
+	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("Insufficient args!")
+	}
+
+	user_id := user.ID
+	feed, err := s.db.GetFeedFromURL(context.Background(), cmd.args[0])
+
+	if err != nil {
+		return err
+	}
+
+	feed_id := feed.ID
+
+	feed_follow := database.DeleteFeedFollowParams{
+		UserID: user_id,
+		FeedID: feed_id,
+	}
+
+	err = s.db.DeleteFeedFollow(context.Background(), feed_follow)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Unfollowed %s successfully!\n", feed.Name)
 	return nil
 }
