@@ -101,6 +101,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = cmds.register("browse", handlerBrowse)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if len(os.Args) < 2 {
 		log.Fatalf("Not enough args provided!\n")
 	}

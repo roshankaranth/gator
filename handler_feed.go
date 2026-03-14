@@ -130,11 +130,49 @@ func scrapeFeeds(s *state) error {
 		return err
 	}
 
-	fmt.Printf("%s\n", feed.Channel.Title)
 	for _, item := range feed.Channel.Item {
-		fmt.Printf("- %s\n", item.Title)
+
+		pubDate, err := parseTime(item.PubDate)
+
+		if err != nil {
+			return err
+		}
+
+		post := database.CreatePostsParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Title:     item.Title,
+			Url:       item.Link,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			},
+			PublishedAt: pubDate,
+			FeedID:      feed_to_fetch.ID,
+		}
+		_, err = s.db.CreatePosts(context.Background(), post)
+
+		if err != nil {
+			return err
+		}
 	}
-	fmt.Printf("\n\n")
 	return nil
 
+}
+
+func parseTime(s string) (time.Time, error) {
+	layouts := []string{
+		time.RFC1123Z,
+		time.RFC1123,
+		time.RFC822Z,
+		time.RFC822,
+	}
+
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("cannot parse time")
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -150,4 +151,32 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	}
 
 	return nil
+}
+
+func handlerBrowse(s *state, cmd command) error {
+	lim := int32(2)
+	if len(cmd.args) >= 1 {
+		v, err := strconv.Atoi(cmd.args[0])
+
+		if err != nil {
+			return err
+		}
+
+		lim = int32(v)
+
+	}
+
+	posts, err := s.db.GetPostsForUser(context.Background(), lim)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Feed : \n")
+	for _, post := range posts {
+		fmt.Printf("- %s : %s\n", post.Title, post.Url)
+	}
+
+	return nil
+
 }
