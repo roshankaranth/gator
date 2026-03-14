@@ -81,16 +81,23 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func handlerAggregate(s *state, cmd command) error {
-	url := "https://www.wagslane.dev/index.xml"
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("Insufficient args!")
+	}
 
-	rssFeed, err := fetchFeed(context.Background(), url)
+	time_between_reqs, err := time.ParseDuration(cmd.args[0])
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%v", *rssFeed)
-	return nil
+	fmt.Printf("Collecting feed every %v\n", time_between_reqs)
+
+	ticker := time.NewTicker(time_between_reqs)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
+
 }
 
 func handlerFollow(s *state, cmd command, user database.User) error {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -100,4 +101,40 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 
 	fmt.Printf("Unfollowed %s successfully!\n", feed.Name)
 	return nil
+}
+
+func scrapeFeeds(s *state) error {
+	feed_to_fetch, err := s.db.GetNextFeedToFetch(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	mark_feed_params := database.MarkFeedFetchedParams{
+		ID: feed_to_fetch.ID,
+		LastFetchedAt: sql.NullTime{
+			Time:  time.Now().UTC(),
+			Valid: true,
+		},
+	}
+
+	err = s.db.MarkFeedFetched(context.Background(), mark_feed_params)
+
+	if err != nil {
+		return err
+	}
+
+	feed, err := fetchFeed(context.Background(), feed_to_fetch.Url)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s\n", feed.Channel.Title)
+	for _, item := range feed.Channel.Item {
+		fmt.Printf("- %s\n", item.Title)
+	}
+	fmt.Printf("\n\n")
+	return nil
+
 }
