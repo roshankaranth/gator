@@ -101,7 +101,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = cmds.register("browse", handlerBrowse)
+	err = cmds.register("browse", middlewareLoggedIn(handlerBrowse))
 
 	if err != nil {
 		log.Fatal(err)

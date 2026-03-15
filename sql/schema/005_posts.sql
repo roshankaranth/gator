@@ -8,7 +8,7 @@ CREATE TABLE posts(
     description TEXT,
     published_at TIMESTAMP NOT NULL,
     feed_id UUID NOT NULL,
-    FOREIGN KEY (feed_id) REFERENCES feeds(id)
+    FOREIGN KEY (feed_id) REFERENCES feeds(id) ON DELETE CASCADE
 );
 
 -- +goose Down
